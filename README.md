@@ -1,4 +1,4 @@
-first take look of the requirement.txt file
+first take look at the requirement.txt file
 
 # Start example
 python src/class_prediction.py --graph graph/bgs.nt --dataset graph/bgs_completeDataset_lith.tsv
