@@ -18,7 +18,7 @@ def parse_args():
 	parser = argparse.ArgumentParser(description="Run parse.")
 	parser.add_argument('--graph', nargs='?', default='graph/aifb_fixed_complete.nt',help='graph path')
 
-	parser.add_argument('--dataset', nargs='?', default='graph/aifb_completeDataset.tsv',help='graph path')
+	parser.add_argument('--dataset', nargs='?', default='graph/aifb_completeDataset.tsv',help='dataset path')
 
 	parser.add_argument('--input', nargs='?', default='graph/karate.edgelist',
 	                    help='Input graph path')
@@ -32,13 +32,13 @@ def parse_args():
 	parser.add_argument('--walk-length', type=int, default=80,
 	                    help='Length of walk per source. Default is 80.') #length of walk l
 
-	parser.add_argument('--num-walks', type=int, default=10,
+	parser.add_argument('--num-walks', type=int, default=100,
 	                    help='Number of walks per source. Default is 10.') #walks per node r
 
-	parser.add_argument('--window-size', type=int, default=10,
+	parser.add_argument('--window-size', type=int, default=5,
                     	help='Context size for optimization. Default is 10.')
 
-	parser.add_argument('--iter', default=1, type=int,
+	parser.add_argument('--iter', default=20, type=int,
                       help='Number of epochs in SGD')
 
 	parser.add_argument('--workers', type=int, default=8,
@@ -183,6 +183,8 @@ if __name__ == '__main__':
 	'''
 
 	colors = {}
+	color=['red', 'green', 'blue','white','orange','black','yellow', 'gray', 'purple']
+	j=0
 	visited_group=[]
 	group=node_dataset.values()		
 	X_plot=[]
@@ -196,11 +198,12 @@ if __name__ == '__main__':
 	for i in range(len(X_plot)):
 		if group[i] not in visited_group:
 			visited_group.append(group[i])
-			c=np.random.rand(3,1)
+			#c=np.random.rand(3,1)
 			#while c in colors.values():
 			#	print "generating a new color"
 			#	c=np.random.rand(3,1)
-			colors[group[i]]=c
+			colors[group[i]]=color[j]
+			j=j+1
 		plt.scatter(X_plot[i,0], X_plot[i,1], c=colors.get(group[i]))
 
 
