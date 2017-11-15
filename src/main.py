@@ -14,11 +14,11 @@ import numpy as np
 import networkx as nx
 import node2vec
 from gensim.models import Word2Vec
-
+'''
 def parse_args():
-	'''
-	Parses the node2vec arguments.
-	'''
+	
+	#Parses the node2vec arguments.
+	
 	parser = argparse.ArgumentParser(description="Run node2vec.")
 
 	parser.add_argument('--input', nargs='?', default='graph/karate.edgelist',
@@ -62,17 +62,24 @@ def parse_args():
 	parser.set_defaults(directed=False)
 
 	return parser.parse_args()
-
+'''
 def read_graph(args):
 	'''
 	Reads the input network in networkx.
 	'''
 	if args.weighted:
-		G = nx.read_edgelist(args.input, comments='!', nodetype=str, data=(('weight',float),), create_using=nx.DiGraph())
-		#G = nx.read_edgelist(args.input, nodetype=int, data=(('weight',float),), create_using=nx.DiGraph())
+		if args.labeled:
+			G = nx.read_edgelist(args.input, comments='@', nodetype=str, data=(('weight',float),('label',str),), create_using=nx.DiGraph())
+		else:
+			G = nx.read_edgelist(args.input, comments='@', nodetype=str, data=(('weight',float),), create_using=nx.DiGraph())
 	else:
-		G = nx.read_edgelist(args.input, comments='!', nodetype=str, create_using=nx.DiGraph())
-		#G = nx.read_edgelist(args.input, nodetype=int, create_using=nx.DiGraph())
+		if args.labeled:
+			print "is labeled"
+			G = nx.read_edgelist(args.input, comments='@', nodetype=str, data=(('label',str),), create_using=nx.DiGraph())
+			#G = nx.read_edgelist(args.input, nodetype=int, data=(('weight',float),), create_using=nx.DiGraph())
+		else:
+			G = nx.read_edgelist(args.input, comments='@', nodetype=str, create_using=nx.DiGraph())
+			#G = nx.read_edgelist(args.input, nodetype=int, create_using=nx.DiGraph())
 		for edge in G.edges():
 			G[edge[0]][edge[1]]['weight'] = 1
 
@@ -91,7 +98,7 @@ def learn_embeddings(walks, args):
 	
 	return
 
-def main(args):
+def generate_embeddings(args):
 	'''
 	Pipeline for representational learning for all nodes in a graph.
 	'''
@@ -101,7 +108,8 @@ def main(args):
 	walks = G.simulate_walks(args.num_walks, args.walk_length) # args.num_walks=10 *** , args.walk_length=80. man muss es richtig einstellen
 	#print walks
 	learn_embeddings(walks, args)
-
+'''
 if __name__ == "__main__":
 	args = parse_args()
 	main(args)
+'''

@@ -59,6 +59,11 @@ def parse_args():
 	parser.add_argument('--unweighted', dest='unweighted', action='store_false')
 	parser.set_defaults(weighted=False)
 
+	parser.add_argument('--labeled', dest='labeled', action='store_true',
+	                    help='Boolean specifying (un)labeled. Default is labeled.')
+	parser.add_argument('--unlabeled', dest='unlabeled', action='store_false')
+	parser.set_defaults(labeled=True)
+
 	parser.add_argument('--directed', dest='directed', action='store_true',
 	                    help='Graph is (un)directed. Default is directed.')
 	parser.add_argument('--undirected', dest='undirected', action='store_false')
@@ -77,12 +82,35 @@ def edgelist(graph):
 		g.parse(graph, format="nt")
 	else:
 		g.parse(graph)
-
+	
+	out_file= graph.split('.')[0]+'.edgelist'
+	
+	f = open(out_file, 'w')
 
 	g1=g.subject_objects()
 	out_file= graph.split('.')[0]+'.edgelist'
 	f = open(out_file, 'w')
 
+	class_to_remove=["affiliation", "lithogenesis"]
+	found=False
+
+	for (s,p,o) in g:
+		type_of_subject=str(type(s))
+		type_of_object=str(type(o))
+		found=False
+		if ('Literal' not in type_of_object) and ('Literal' not in type_of_subject):
+			for c in class_to_remove:
+				if c in p.encode('utf-8'):
+					found=True
+					break
+			if found==False:
+				towrite= "{} {} {}\n".format(s.encode('utf-8'), o.encode('utf-8'), p.encode('utf-8'))
+				f.write(towrite)
+			else:
+				found=False
+	f.close()
+	return out_file
+'''
 	for (s,o) in g1:
 		type_subject=str(type(s))
 		type_object=str(type(o))
@@ -91,6 +119,10 @@ def edgelist(graph):
 			f.write(towrite)
 	f.close()
 	return out_file
+'''
+
+	
+
 
 def pca_plot(X):
 	print len(X)
@@ -118,7 +150,7 @@ if __name__ == '__main__':
 	node_to_plot=[]
 
 	#generate the embeddings 
-	main.main(args)
+	main.generate_embeddings(args)
 
 	#build a dictionary of features
 	file_emb= open(args.output, "r") 
@@ -127,6 +159,7 @@ if __name__ == '__main__':
 	for i in range(1,len(data_emb)):
 		array=data_emb[i].split(" ")
 		key=array[0] 		#node
+		#key=array[0].split('@')[0] 		#node
 		value=[]			#embeddings
 		for j in range(1,len(array)):
 			value.append(float(array[j]))
@@ -177,14 +210,6 @@ if __name__ == '__main__':
 		durchnitt=durchnitt+s/len(scores_csvm)
 	print "accuracy_score_SVM = {}".format(durchnitt)
 
-	scores_gnb=cross_val_score(gnb, X, node_dataset.values(), cv=10)
-	#print scores_gnb
-	durchnitt=0
-	for s in scores_gnb:
-		print s
-		durchnitt=durchnitt+s/len(scores_gnb)
-	print "accuracy_score_NB = {}".format(durchnitt)
-
 	scores_KNN=cross_val_score(KNN, X, node_dataset.values(), cv=10)
 	#print scores_KNN
 	durchnitt=0
@@ -193,6 +218,15 @@ if __name__ == '__main__':
 		durchnitt=durchnitt+s/len(scores_KNN)
 	print "accuracy_score_KNN = {}".format(durchnitt)
 
+	scores_gnb=cross_val_score(gnb, X, node_dataset.values(), cv=10)
+	#print scores_gnb
+	durchnitt=0
+	for s in scores_gnb:
+		print s
+		durchnitt=durchnitt+s/len(scores_gnb)
+	print "accuracy_score_NB = {}".format(durchnitt)
+
+	
 
 	'''
 	**********************************************************************************************************************************

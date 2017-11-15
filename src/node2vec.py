@@ -23,14 +23,24 @@ class Graph():
 		while len(walk) < walk_length:
 			cur = walk[-1]
 			cur_nbrs = sorted(G.neighbors(cur))
+			#print "cur nodes : {}".format(cur_nbrs)
 			if len(cur_nbrs) > 0:
 				if len(walk) == 1:
-					walk.append(cur_nbrs[alias_draw(alias_nodes[cur][0], alias_nodes[cur][1])])
+					cur_node = cur_nbrs[alias_draw(alias_nodes[cur][0], alias_nodes[cur][1])]
+					#print "label", cur, cur_node, G[cur][cur_node]['label']
+					walk.append(G[cur][cur_node]['label']) # Kante-Information hinzugefuegt
+					walk.append(cur_node)
+					#walk.append(cur_nbrs[alias_draw(alias_nodes[cur][0], alias_nodes[cur][1])])
 				else:
-					prev = walk[-2]
+					prev = walk[-3]
+					#prev = walk[-2]
 					next = cur_nbrs[alias_draw(alias_edges[(prev, cur)][0], 
 						alias_edges[(prev, cur)][1])]
+					last_node = walk[len(walk)-1]
+					#print "label", cur, next, G[cur][next]['label']
+					walk.append(G[cur][next]['label']) # Kante-Information hinzugefuegt
 					walk.append(next)
+					#print G[last_node][next]['label']
 			else:
 				break
 		return walk
@@ -48,7 +58,7 @@ class Graph():
 			random.shuffle(nodes)
 			for node in nodes:
 				walks.append(self.node2vec_walk(walk_length=walk_length, start_node=node))
-
+			#print walks
 		return walks
 
 	def get_alias_edge(self, src, dst):
@@ -143,6 +153,6 @@ def alias_draw(J, q):
 
 	kk = int(np.floor(np.random.rand()*K))
 	if np.random.rand() < q[kk]:
-	    return kk
+		return kk
 	else:
-	    return J[kk]
+		return J[kk]
