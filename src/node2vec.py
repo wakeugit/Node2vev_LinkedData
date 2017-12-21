@@ -45,20 +45,49 @@ class Graph():
 				break
 		return walk
 
-	def simulate_walks(self, num_walks, walk_length):
+	def simulate_walks(self, num_walks, walk_length, dataset_items):
 		'''
 		Repeatedly simulate random walks from each node.
 		'''
 		G = self.G
 		walks = []
 		nodes = list(G.nodes())
+		file = open("walks/aifb.walks", 'w') #to write walks for datasetitems
+		f = open("walks/aifb.roots", 'w') #to write walks for datasetitems
+		f.close()
+		
 		print 'Walk iteration:'
 		for walk_iter in range(num_walks):
 			print str(walk_iter+1), '/', str(num_walks)
 			random.shuffle(nodes)
 			for node in nodes:
-				walks.append(self.node2vec_walk(walk_length=walk_length, start_node=node))
+				walk = self.node2vec_walk(walk_length=walk_length, start_node=node)
+				walks.append(walk)
+
+				#only for experiments. can be delete
+				if node in dataset_items:
+					#print walk
+					for item in walk:
+						file.write(item)
+						file.write(", ")
+					file.write("\n")
+				f = open("walks/aifb.roots", 'r') #to write root of nodes in datasets
+				lines = f.readlines()
+				f.close()
+				found=False
+				for n in walk:
+					if n in dataset_items and n != node:
+						towrite="{}, {}, {}".format(walk[walk.index(n)-2], walk[walk.index(n)-1], n)
+						for line in lines:
+							if towrite in line:
+								found=True
+						if not found:
+							f = open("walks/aifb.roots", 'a') #to write root of nodes in datasets
+							f.write(towrite+"\n")
+							f.close()
+				#end of experiments
 			#print walks
+		file.close()
 		return walks
 
 	def get_alias_edge(self, src, dst):

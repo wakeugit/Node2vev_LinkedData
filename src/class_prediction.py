@@ -1,5 +1,6 @@
 import argparse
 import numpy as np
+from mpl_toolkits.mplot3d import Axes3D
 import matplotlib.pyplot as plt
 from sklearn.decomposition import PCA
 from sklearn import tree
@@ -33,10 +34,10 @@ def parse_args():
 	parser.add_argument('--dimensions', type=int, default=500,
 	                    help='Number of dimensions. Default is 128.') #dimensions d
 
-	parser.add_argument('--walk-length', type=int, default=8,
+	parser.add_argument('--walk-length', type=int, default=8, # s1 p1 o1 p2 o2 p3 o3 p4 o4 == s1 o1 o2 o3 o4
 	                    help='Length of walk per source. Default is 80.') #length of walk l
 
-	parser.add_argument('--num-walks', type=int, default=500,
+	parser.add_argument('--num-walks', type=int, default=10,
 	                    help='Number of walks per source. Default is 10.') #walks per node r
 
 	parser.add_argument('--window-size', type=int, default=5,
@@ -87,11 +88,8 @@ def edgelist(graph):
 	
 	f = open(out_file, 'w')
 
-	g1=g.subject_objects()
-	out_file= graph.split('.')[0]+'.edgelist'
-	f = open(out_file, 'w')
-
-	class_to_remove=["affiliation", "lithogenesis"]
+	class_to_remove=["http://swrc.ontoware.org/ontology#affiliation", "http://data.bgs.ac.uk/ref/Lexicon/hasLithogenesis"] # gesamte url nehmen
+	#important_labels_aifb=[" http://www.w3.org/1999/02/22-rdf-syntax-ns#type", " http://swrc.ontoware.org/ontology#publication", "http://swrc.ontoware.org/ontology#worksAtProject", " http://swrc.ontoware.org/ontology#member"]
 	found=False
 
 	for (s,p,o) in g:
@@ -121,9 +119,6 @@ def edgelist(graph):
 	return out_file
 '''
 
-	
-
-
 def pca_plot(X):
 	print len(X)
 	pca = PCA(n_components=2)
@@ -149,8 +144,21 @@ if __name__ == '__main__':
 	node_feature={}
 	node_to_plot=[]
 
+	#build a dictionary of person + classification
+	file_dataset=open(args.dataset)
+	file_dataset.readline()	#read the first line
+	dataset=file_dataset.readlines()
+
+	for data in dataset:
+		array=data.split('\t')
+		#key=array[0]				#person
+		#value=array[1].split('\r')[0]	#classification
+		key=array[1]				#person
+		value=array[2].split('\r')[0]	#classification
+		node_dataset[key]=value
+
 	#generate the embeddings 
-	main.generate_embeddings(args)
+	main.generate_embeddings(args, node_dataset.keys())
 
 	#build a dictionary of features
 	file_emb= open(args.output, "r") 
@@ -164,19 +172,6 @@ if __name__ == '__main__':
 		for j in range(1,len(array)):
 			value.append(float(array[j]))
 		node_feature[key]=value
-
-	#build a dictionary of person + classification
-	file_dataset=open(args.dataset)
-	file_dataset.readline()	#read the first line
-	dataset=file_dataset.readlines()
-
-	for data in dataset:
-		array=data.split('\t')
-		#key=array[0]				#person
-		#value=array[1].split('\r')[0]	#classification
-		key=array[1]				#person
-		value=array[2].split('\r')[0]	#classification
-		node_dataset[key]=value
 
 
 	#array of node to plot
@@ -242,17 +237,33 @@ if __name__ == '__main__':
 	X_plot=[]
 
 	pca = PCA(n_components=2)
+	#pca = PCA(n_components=3)
+
 	pca.fit(node_to_plot)
 	X_plot=pca.transform(node_to_plot)
+	plt.subplots_adjust(bottom = 0.1)
+
+	#fig=plt.figure()
+	#ax=fig.add_subplot(111, projection='3d')
 	
 	for i in range(len(X_plot)):
 		if group[i] not in visited_group:
 			visited_group.append(group[i])
 			colors[group[i]]=color[j]
 			j=j+1
+
+		#ax.scatter(X_plot[i,0], X_plot[i,1], X_plot[i,2], c=colors.get(group[i]), marker='o')
 		plt.scatter(X_plot[i,0], X_plot[i,1], c=colors.get(group[i]))
+		array=node_dataset.keys()[i].split('/')
+		
+		#to annotadte the plotted points with their id
+		#ax.text(X_plot[i,0], X_plot[i,1], X_plot[i,2], '%s' % (str(array[len(array)-1])), size=10, zorder=1, color='k') 
+		plt.annotate(array[len(array)-1],xy=(X_plot[i,0], X_plot[i,1]), xytext=(-20, 20),textcoords='offset points', ha='right', va='bottom', bbox=dict(boxstyle='round,pad=0.5', fc='white', alpha=0.5), arrowprops=dict(arrowstyle = '->', connectionstyle='arc3,rad=0'))
 
+	#ax.set_xlabel("x axis")
+	#ax.set_ylabel("y axis")
+	#ax.set_zlabel("z axis")
 
-	plt.xlabel('x1')
-	plt.ylabel('x2')
+	plt.xlabel('x')
+	plt.ylabel('y')
 	plt.show()

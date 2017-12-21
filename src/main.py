@@ -69,7 +69,8 @@ def read_graph(args):
 	'''
 	if args.weighted:
 		if args.labeled:
-			G = nx.read_edgelist(args.input, comments='@', nodetype=str, data=(('weight',float),('label',str),), create_using=nx.DiGraph())
+			print "is labeled and weithed"
+			G = nx.read_edgelist(args.input, comments='@', nodetype=str, data=(('label',str),('weight',float),), create_using=nx.DiGraph())
 		else:
 			G = nx.read_edgelist(args.input, comments='@', nodetype=str, data=(('weight',float),), create_using=nx.DiGraph())
 	else:
@@ -93,19 +94,19 @@ def learn_embeddings(walks, args):
 	Learn embeddings by optimizing the Skipgram objective using SGD.
 	'''
 	walks = [map(str, walk) for walk in walks]
-	model = Word2Vec(walks, size=args.dimensions, window=args.window_size, min_count=0, sg=1, workers=args.workers, iter=args.iter)
+	model = Word2Vec(walks, size=args.dimensions, window=args.window_size, min_count=0, sg=1, workers=args.workers, negative=25, iter=args.iter, )
 	model.wv.save_word2vec_format(args.output)
 	
 	return
 
-def generate_embeddings(args):
+def generate_embeddings(args, dataset_items):
 	'''
 	Pipeline for representational learning for all nodes in a graph.
 	'''
 	nx_G = read_graph(args)
 	G = node2vec.Graph(nx_G, args.directed, args.p, args.q)
 	G.preprocess_transition_probs()
-	walks = G.simulate_walks(args.num_walks, args.walk_length) # args.num_walks=10 *** , args.walk_length=80. man muss es richtig einstellen
+	walks = G.simulate_walks(args.num_walks, args.walk_length, dataset_items) #args.num_walks=10 ***, args.walk_length=80. man muss es richtig einstellen
 	#print walks
 	learn_embeddings(walks, args)
 '''
