@@ -31,13 +31,13 @@ def parse_args():
 	parser.add_argument('--output', nargs='?', default='emb/karate.emb',
 	                    help='Embeddings path')
 
-	parser.add_argument('--dimensions', type=int, default=500,
+	parser.add_argument('--dimensions', type=int, default=200,
 	                    help='Number of dimensions. Default is 128.') #dimensions d
 
 	parser.add_argument('--walk-length', type=int, default=8, # s1 p1 o1 p2 o2 p3 o3 p4 o4 == s1 o1 o2 o3 o4
 	                    help='Length of walk per source. Default is 80.') #length of walk l
 
-	parser.add_argument('--num-walks', type=int, default=10,
+	parser.add_argument('--num-walks', type=int, default=500,
 	                    help='Number of walks per source. Default is 10.') #walks per node r
 
 	parser.add_argument('--window-size', type=int, default=5,
@@ -193,33 +193,33 @@ if __name__ == '__main__':
 	#print scores_dt
 	durchnitt=0
 	for s in scores_dt:
-		print s
+		print s*100
 		durchnitt=durchnitt+s/len(scores_dt)
-	print "accuracy_score_C4.5 = {}".format(durchnitt)
+	print "accuracy_score_C4.5 = {}".format(durchnitt*100)
 
 	scores_csvm=cross_val_score(csvm, X, node_dataset.values(), cv=10)
 	#print scores_csvm
 	durchnitt=0
 	for s in scores_csvm:
-		print s
+		print s*100
 		durchnitt=durchnitt+s/len(scores_csvm)
-	print "accuracy_score_SVM = {}".format(durchnitt)
+	print "accuracy_score_SVM = {}".format(durchnitt*100)
 
 	scores_KNN=cross_val_score(KNN, X, node_dataset.values(), cv=10)
 	#print scores_KNN
 	durchnitt=0
 	for s in scores_KNN:
-		print s
+		print s*100
 		durchnitt=durchnitt+s/len(scores_KNN)
-	print "accuracy_score_KNN = {}".format(durchnitt)
+	print "accuracy_score_KNN = {}".format(durchnitt*100)
 
 	scores_gnb=cross_val_score(gnb, X, node_dataset.values(), cv=10)
 	#print scores_gnb
 	durchnitt=0
 	for s in scores_gnb:
-		print s
+		print s*100
 		durchnitt=durchnitt+s/len(scores_gnb)
-	print "accuracy_score_NB = {}".format(durchnitt)
+	print "accuracy_score_NB = {}".format(durchnitt*100)
 
 	
 
@@ -258,7 +258,7 @@ if __name__ == '__main__':
 		
 		#to annotadte the plotted points with their id
 		#ax.text(X_plot[i,0], X_plot[i,1], X_plot[i,2], '%s' % (str(array[len(array)-1])), size=10, zorder=1, color='k') 
-		plt.annotate(array[len(array)-1],xy=(X_plot[i,0], X_plot[i,1]), xytext=(-20, 20),textcoords='offset points', ha='right', va='bottom', bbox=dict(boxstyle='round,pad=0.5', fc='white', alpha=0.5), arrowprops=dict(arrowstyle = '->', connectionstyle='arc3,rad=0'))
+		#plt.annotate(array[len(array)-1],xy=(X_plot[i,0], X_plot[i,1]), xytext=(-20, 20),textcoords='offset points', ha='right', va='bottom', bbox=dict(boxstyle='round,pad=0.5', fc='white', alpha=0.5), arrowprops=dict(arrowstyle = '->', connectionstyle='arc3,rad=0'))
 
 	#ax.set_xlabel("x axis")
 	#ax.set_ylabel("y axis")
